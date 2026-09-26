@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { ArrowRight, BadgeCheck, FlaskConical, Pill, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck, Pill, ShieldCheck, Sparkles } from "lucide-react";
 import { divisions, products } from "@/lib/products";
 
 /** Seconds each product stays on screen in the hero showcase. */
@@ -54,13 +54,13 @@ function ProductShowcase() {
 
 function HeroVisual() {
   return (
-    <div className="relative mx-auto w-full max-w-[640px] px-3 pb-10 pt-6 sm:px-8 lg:max-w-none lg:px-0 lg:pb-12 lg:pl-10">
+    <div className="relative mx-auto w-full max-w-[640px] px-3 pb-10 pt-6 sm:px-8 lg:max-w-none lg:px-0 lg:pb-12 lg:pl-6">
       {/* Decorative rings & glow */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[118%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-brand-sky/25 animate-spin-slow" />
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[92%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-lime/25 via-brand-sky/20 to-brand-blue/25 blur-3xl" />
 
       {/* Main image */}
-      <div className="hero-rise group relative aspect-[5/4] overflow-hidden rounded-[32px] border-[6px] border-white bg-white shadow-lift sm:rounded-[40px] lg:aspect-[16/14]" style={rise(250)}>
+      <div className="hero-rise group relative aspect-[5/4] overflow-hidden rounded-[32px] border-[6px] border-white bg-white shadow-lift sm:rounded-[40px] lg:aspect-[16/13.5]" style={rise(250)}>
         <Image
           src="/images/site/hero-scientist.webp"
           alt="Bhidwaria pharmaceutical scientist examining samples under a microscope"
@@ -70,14 +70,9 @@ function HeroVisual() {
           className="object-cover object-[74%_center] transition duration-[1.4s] ease-out group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/75 via-brand-navy/10 to-transparent" />
-        <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 sm:bottom-7 sm:left-7 sm:right-7">
-          <div>
-            <div className="text-[10px] font-extrabold uppercase tracking-[.2em] text-lime-300">Science that cares</div>
-            <div className="mt-1 max-w-[260px] font-display text-lg font-bold leading-6 text-white sm:text-xl">Quality medicines for a healthier tomorrow</div>
-          </div>
-          <span className="hidden h-12 w-12 shrink-0 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur sm:grid">
-            <FlaskConical size={20} />
-          </span>
+        <div className="absolute bottom-5 right-5 max-w-[48%] text-right sm:bottom-7 sm:right-7">
+          <div className="text-[10px] font-extrabold uppercase tracking-[.2em] text-lime-300">Science that cares</div>
+          <div className="mt-1 font-display text-base font-bold leading-6 text-white sm:text-xl">Quality medicines for a healthier tomorrow</div>
         </div>
       </div>
 
