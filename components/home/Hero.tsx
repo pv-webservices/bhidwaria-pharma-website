@@ -1,85 +1,177 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, HeartHandshake, Pill, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { products } from "@/lib/products";
+import type { CSSProperties } from "react";
+import { ArrowRight, BadgeCheck, FlaskConical, Pill, ShieldCheck, Sparkles } from "lucide-react";
+import { divisions, products } from "@/lib/products";
 
-function Molecule({ className = "" }: { className?: string }) {
-  const nodes = [
-    [60, 20], [100, 43], [100, 89], [60, 112], [20, 89], [20, 43],
-    [140, 20], [180, 43], [180, 89], [140, 112],
-  ];
-  const links = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 7], [7, 8], [8, 9], [9, 2]];
+/** Seconds each product stays on screen in the hero showcase. */
+const SLIDE_SECONDS = 3;
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+const stats = [
+  { value: pad(products.length), label: "Branded Formulations" },
+  { value: pad(divisions.filter((d) => d.kind === "therapy").length), label: "Therapy Areas" },
+  { value: pad(divisions.filter((d) => d.kind === "dosage").length), label: "Dosage Forms" },
+];
+
+const rise = (delay: number): CSSProperties => ({ animationDelay: `${delay}ms` });
+
+/** Crossfade keyframes sized to the number of products, so each slide gets an equal share of the loop. */
+function slideKeyframes(count: number) {
+  const share = 100 / count;
+  const fade = Math.min(2.5, share / 4);
+  const f = (n: number) => `${n.toFixed(2)}%`;
+  return `@keyframes hero-slide{0%{opacity:0;visibility:visible;transform:translateY(12px)}${f(fade)}{opacity:1;transform:none}${f(share)}{opacity:1;transform:none}${f(share + fade)}{opacity:0;visibility:hidden;transform:translateY(-12px)}100%{opacity:0;visibility:hidden}}`;
+}
+
+function ProductShowcase() {
+  const total = products.length * SLIDE_SECONDS;
   return (
-    <svg viewBox="0 0 200 132" className={className} aria-hidden="true">
-      {links.map(([a, b]) => (
-        <line key={`${a}-${b}`} x1={nodes[a][0]} y1={nodes[a][1]} x2={nodes[b][0]} y2={nodes[b][1]} stroke="currentColor" strokeWidth="1.4" opacity=".5" />
+    <div className="relative h-[92px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-white to-brand-mist">
+      <style>{slideKeyframes(products.length)}</style>
+      {products.map((p, i) => (
+        <Link
+          key={p.slug}
+          href={`/products/${p.slug}`}
+          className="hero-slide absolute inset-0 flex items-center gap-3 p-2.5"
+          style={{ animationDuration: `${total}s`, animationDelay: `${i * SLIDE_SECONDS}s` }}
+          tabIndex={-1}
+        >
+          <span className="relative h-full w-[92px] shrink-0 overflow-hidden rounded-xl bg-white shadow-sm">
+            <Image src={p.image} alt="" fill sizes="92px" className="object-contain p-1.5" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate font-display text-[15px] font-extrabold leading-5 text-brand-navy">{p.brand}</span>
+            <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500">{p.therapy}</span>
+            <span className="mt-1.5 inline-flex rounded-full bg-brand-pale px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-brand-green">{p.dosageForm}</span>
+          </span>
+        </Link>
       ))}
-      {nodes.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 6 : 4.5} fill="currentColor" opacity={i % 2 ? 0.55 : 0.9} />
-      ))}
-    </svg>
+    </div>
   );
 }
 
-const highlights = [
-  { label: "Quality Focused", icon: ShieldCheck },
-  { label: "Patient-Centric Approach", icon: Users },
-  { label: "Committed to a Healthier Tomorrow", icon: HeartHandshake },
-];
-
-export function Hero() {
+function HeroVisual() {
   return (
-    <section className="relative isolate overflow-hidden bg-hero-glow">
-      <div className="absolute inset-0 -z-10 pattern-grid opacity-50" />
-      {/* Image: right side on desktop, top on mobile */}
-      <div className="relative h-[300px] sm:h-[380px] lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[60%]">
+    <div className="relative mx-auto w-full max-w-[640px] px-3 pb-10 pt-6 sm:px-8 lg:max-w-none lg:px-0 lg:pb-12 lg:pl-10">
+      {/* Decorative rings & glow */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[118%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-brand-sky/25 animate-spin-slow" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[92%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-lime/25 via-brand-sky/20 to-brand-blue/25 blur-3xl" />
+
+      {/* Main image */}
+      <div className="hero-rise group relative aspect-[5/4] overflow-hidden rounded-[32px] border-[6px] border-white bg-white shadow-lift sm:rounded-[40px] lg:aspect-[16/14]" style={rise(250)}>
         <Image
           src="/images/site/hero-scientist.webp"
           alt="Bhidwaria pharmaceutical scientist examining samples under a microscope"
           fill
           priority
-          sizes="(min-width:1024px) 60vw, 100vw"
-          className="object-cover object-[70%_center]"
+          sizes="(min-width:1024px) 48vw, 100vw"
+          className="object-cover object-[74%_center] transition duration-[1.4s] ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#f3f9fd] via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#f3f9fd] lg:via-[#f3f9fd]/40 lg:to-transparent" />
-        <Molecule className="absolute left-[8%] top-10 hidden w-44 animate-float-slow text-brand-sky/60 lg:block" />
-        <div className="absolute bottom-10 right-6 hidden animate-float rounded-2xl border border-white/60 bg-white/85 px-5 py-4 shadow-lift backdrop-blur-md lg:block xl:right-12">
-          <div className="text-[10px] font-extrabold uppercase tracking-[.18em] text-brand-blue">Science</div>
-          <div className="mt-1 max-w-[160px] font-display text-sm font-bold leading-5 text-brand-navy">For a healthier tomorrow</div>
-          <div className="mt-2.5 h-1 w-10 rounded-full bg-gradient-to-r from-brand-green to-brand-sky" />
-        </div>
-        <div className="absolute right-[38%] top-16 hidden animate-float-slow items-center gap-3 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 shadow-lift backdrop-blur-md xl:flex">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-green to-emerald-600 text-white"><Pill size={18} /></span>
-          <span>
-            <span className="block font-display text-lg font-extrabold leading-5 text-brand-navy">{products.length} Brands</span>
-            <span className="block text-[11px] font-semibold text-slate-500">Tablets, Capsules & Oral Solutions</span>
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/75 via-brand-navy/10 to-transparent" />
+        <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 sm:bottom-7 sm:left-7 sm:right-7">
+          <div>
+            <div className="text-[10px] font-extrabold uppercase tracking-[.2em] text-lime-300">Science that cares</div>
+            <div className="mt-1 max-w-[260px] font-display text-lg font-bold leading-6 text-white sm:text-xl">Quality medicines for a healthier tomorrow</div>
+          </div>
+          <span className="hidden h-12 w-12 shrink-0 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur sm:grid">
+            <FlaskConical size={20} />
           </span>
         </div>
       </div>
 
-      <div className="container-shell relative -mt-16 pb-16 lg:mt-0 lg:flex lg:min-h-[640px] lg:items-center lg:py-20">
-        <div className="max-w-[600px]">
-          <div className="eyebrow">Better Health. Brighter Tomorrow</div>
-          <h1 className="font-display text-[40px] font-extrabold leading-[1.05] tracking-[-.04em] text-brand-navy sm:text-6xl lg:text-[64px]">
-            Advancing Healthcare.
-            <span className="mt-1 block text-gradient">Building Trusted Partnerships.</span>
+      {/* Floating: brand count */}
+      <div className="hero-rise absolute left-0 top-0 sm:left-2 lg:-left-2 lg:top-8" style={rise(550)}>
+        <div className="flex animate-float items-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lift backdrop-blur-md">
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-green to-emerald-600 text-white shadow-glow"><Pill size={19} /></span>
+          <span>
+            <span className="block font-display text-xl font-extrabold leading-6 text-brand-navy">{products.length} Brands</span>
+            <span className="block text-[11px] font-semibold text-slate-500">Tablets · Capsules · Oral Solutions</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Floating: quality badge */}
+      <div className="hero-rise absolute right-0 top-[38%] hidden sm:block lg:-right-4" style={rise(700)}>
+        <div className="flex animate-float-slow items-center gap-2.5 rounded-full border border-white/70 bg-white/90 py-2 pl-2 pr-4 shadow-lift backdrop-blur-md">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-blue text-white"><ShieldCheck size={17} /></span>
+          <span className="text-[12px] font-extrabold leading-4 text-brand-navy">IP Standard<span className="block font-semibold text-slate-500">Quality Assured</span></span>
+        </div>
+      </div>
+
+      {/* Floating: product showcase */}
+      <div className="hero-rise absolute -bottom-2 right-3 w-[min(310px,82%)] sm:right-8 lg:-bottom-1 lg:right-auto lg:left-0 xl:-left-10" style={rise(850)}>
+        <div className="rounded-3xl border border-white/70 bg-white/95 p-2.5 shadow-lift backdrop-blur-md">
+          <div className="flex items-center justify-between px-1.5 pb-2 pt-0.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-[.18em] text-brand-blue">Our Portfolio</span>
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-brand-green">
+              <span className="relative flex h-2 w-2"><span className="absolute inset-0 animate-ping rounded-full bg-brand-green/60" /><span className="relative h-2 w-2 rounded-full bg-brand-green" /></span>
+              Available now
+            </span>
+          </div>
+          <ProductShowcase />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function Hero() {
+  return (
+    <section className="relative isolate overflow-hidden bg-hero-glow">
+      {/* Background layers */}
+      <div className="absolute inset-0 -z-10 pattern-grid opacity-60 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+      <div className="pointer-events-none absolute -left-40 -top-40 -z-10 h-[520px] w-[520px] rounded-full bg-brand-lime/20 blur-3xl animate-blob" />
+      <div className="pointer-events-none absolute -right-32 top-1/3 -z-10 h-[560px] w-[560px] rounded-full bg-brand-sky/20 blur-3xl animate-blob [animation-delay:-7s]" />
+
+      <div className="container-wide grid items-center gap-12 pb-16 pt-10 sm:pt-14 lg:min-h-[680px] lg:grid-cols-[1.02fr_1fr] lg:gap-10 lg:py-16 xl:gap-20 2xl:min-h-[760px]">
+        {/* Copy */}
+        <div className="max-w-[680px]">
+          <div className="hero-rise inline-flex items-center gap-2.5 rounded-full border border-brand-green/20 bg-white/80 py-1.5 pl-1.5 pr-4 shadow-card backdrop-blur" style={rise(0)}>
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-brand-green to-brand-sky text-white"><Sparkles size={12} /></span>
+            <span className="text-[11px] font-extrabold uppercase tracking-[.18em] text-brand-navy">Better Health. Brighter Tomorrow</span>
+          </div>
+
+          <h1 className="mt-6 font-display text-[40px] font-extrabold leading-[1.04] tracking-[-.04em] text-brand-navy sm:text-[58px] lg:text-[60px] xl:text-[70px] 2xl:text-[78px]">
+            <span className="hero-rise block" style={rise(100)}>Advancing Healthcare.</span>
+            <span className="hero-rise mt-1 block" style={rise(200)}>
+              <span className="text-gradient-animated">Building Trusted</span>{" "}
+              <span className="relative inline-block text-gradient-animated">
+                Partnerships.
+                <svg className="hero-underline absolute -bottom-2 left-0 h-3 w-full text-brand-lime" viewBox="0 0 300 12" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M2 9 C 80 2, 200 2, 298 7" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                </svg>
+              </span>
+            </span>
           </h1>
-          <p className="lead mt-6 max-w-xl">
+
+          <p className="hero-rise lead mt-7 max-w-[560px] md:text-lg md:leading-8" style={rise(320)}>
             At Bhidwaria Pharmaceuticals, we are committed to improving lives through high-quality, affordable and innovative pharmaceutical solutions — together for a healthier tomorrow.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/products" className="btn btn-primary">Explore Products <ArrowRight size={16} /></Link>
-            <Link href="/business-opportunity" className="btn btn-outline">Partner With Us <Sparkles size={15} /></Link>
+
+          <div className="hero-rise mt-9 flex flex-wrap gap-3" style={rise(420)}>
+            <Link href="/products" className="btn btn-primary !px-7 !py-3.5">Explore Products <ArrowRight size={16} /></Link>
+            <Link href="/business-opportunity" className="btn btn-outline !px-7 !py-3.5">Partner With Us <Sparkles size={15} /></Link>
           </div>
-          <div className="mt-9 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
-            {highlights.map(({ label, icon: Icon }) => (
-              <div key={label} className="flex items-center gap-3 rounded-2xl border border-white bg-white/75 p-3 text-xs font-bold leading-4 text-brand-ink shadow-card backdrop-blur">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-pale text-brand-green"><Icon size={18} /></span>
-                {label}
+
+          <dl className="hero-rise mt-10 grid max-w-[560px] grid-cols-3 divide-x divide-brand-navy/10 rounded-3xl border border-white bg-white/70 py-4 shadow-card backdrop-blur" style={rise(520)}>
+            {stats.map(({ value, label }) => (
+              <div key={label} className="flex flex-col-reverse px-3 text-center sm:px-5">
+                <dt className="mt-1.5 text-[10.5px] font-bold uppercase leading-4 tracking-wider text-slate-500 sm:text-[11px]">{label}</dt>
+                <dd className="font-display text-2xl font-extrabold leading-none text-brand-navy sm:text-[32px]">{value}</dd>
               </div>
+            ))}
+          </dl>
+
+          <div className="hero-rise mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] font-semibold text-slate-600" style={rise(600)}>
+            {["Quality Focused", "Patient-Centric Approach", "Ethical Partnerships"].map((t) => (
+              <span key={t} className="inline-flex items-center gap-1.5"><BadgeCheck size={16} className="text-brand-green" /> {t}</span>
             ))}
           </div>
         </div>
+
+        <HeroVisual />
       </div>
     </section>
   );
