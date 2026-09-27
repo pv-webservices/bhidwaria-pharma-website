@@ -17,9 +17,10 @@ import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { CTA } from "@/components/CTA";
 import { DivisionCard, ProductCard } from "@/components/ProductCard";
-import { articles, partnerBenefits, processSteps, promises, qualityPoints, therapySegments } from "@/lib/data";
+import { partnerBenefits, processSteps, promises, qualityPoints, therapySegments } from "@/lib/data";
+import { articles } from "@/lib/articles";
 import { divisionCount, divisions, products } from "@/lib/products";
-import { company } from "@/lib/site";
+import { company, FRANCHISE_PATH } from "@/lib/site";
 
 const features = [
   { icon: ShieldCheck, title: "Quality Focused", text: "Consistent and reliable products" },
@@ -190,7 +191,7 @@ export default function HomePage() {
           <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
             {partnerBenefits.map(({ title, text, icon: Icon }, i) => (
               <Reveal className="h-full" key={title} delay={i * 60}>
-                <Link href="/business-opportunity" className="card card-hover flex h-full flex-col items-center px-4 py-7 text-center">
+                <Link href={FRANCHISE_PATH} className="card card-hover flex h-full flex-col items-center px-4 py-7 text-center">
                   <span className="card-icon grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-brand-pale to-brand-mist text-brand-green ring-4 ring-white"><Icon size={23} /></span>
                   <div className="mt-4 text-[13px] font-bold leading-5 text-brand-navy">{title}</div>
                   <p className="mt-2 text-[11.5px] leading-5 text-slate-500">{text}</p>
@@ -207,12 +208,12 @@ export default function HomePage() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#041f3a] via-[#062f55]/90 to-transparent" />
         <div className="container-shell flex flex-col gap-8 py-16 md:py-20 lg:flex-row lg:items-center lg:justify-between">
           <Reveal className="max-w-xl">
-            <div className="eyebrow !text-lime-300">Business opportunity</div>
-            <h2 className="font-display text-3xl font-extrabold tracking-[-.03em] text-white md:text-[42px] md:leading-[1.1]">Business & Distribution Opportunities</h2>
-            <p className="mt-4 text-[15px] leading-7 text-white/75">Connect with our team to discuss PCD franchise and distribution availability in your region and explore partnership opportunities.</p>
+            <div className="eyebrow !text-lime-300">Monopoly PCD pharma franchise</div>
+            <h2 className="font-display text-3xl font-extrabold tracking-[-.03em] text-white md:text-[42px] md:leading-[1.1]">Start Your Own Pharma Business With Exclusive Rights</h2>
+            <p className="mt-4 text-[15px] leading-7 text-white/75">Get monopoly rights for your district or state, a focused portfolio of high-demand brands and full promotional support. Talk to our team about availability in your territory.</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/business-opportunity#enquiry" className="btn btn-green">Enquire Now <ArrowRight size={16} /></Link>
-              <Link href="/business-opportunity" className="btn btn-ghost-light">How It Works</Link>
+              <Link href={`${FRANCHISE_PATH}#enquiry`} className="btn btn-green">Enquire Now <ArrowRight size={16} /></Link>
+              <Link href="/services" className="btn btn-ghost-light">Our Services</Link>
             </div>
           </Reveal>
           <div className="hidden text-right font-display text-lg font-bold uppercase leading-7 tracking-[.1em] text-white/90 lg:block">
@@ -316,11 +317,11 @@ export default function HomePage() {
       <section className="section-pad bg-brand-mist/60">
         <div className="container-shell">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <SectionHeading eyebrow="Insights" title="Latest Articles & Updates" />
-            <SectionLink href="/blog">View All Articles</SectionLink>
+            <SectionHeading eyebrow="Our blog" title="Latest Articles & Updates" />
+            <SectionLink href="/blog">Visit Our Blog</SectionLink>
           </div>
           <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            {articles.map((a, i) => (
+            {articles.slice(0, 3).map((a, i) => (
               <Reveal className="h-full" key={a.slug} delay={i * 90}>
                 <Link href={`/blog/${a.slug}`} className="card card-hover group flex h-full flex-col overflow-hidden sm:flex-row lg:flex-col">
                   <div className="relative h-52 overflow-hidden sm:h-auto sm:w-2/5 lg:h-52 lg:w-full">

@@ -61,7 +61,7 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      <section id="catalog" className="section-pad scroll-mt-28 bg-brand-mist/60">
+      <section id="catalog" className="section-pad bg-brand-mist/60">
         <div className="container-shell">
           <SectionHeading eyebrow="Complete range" title="All Products" description="Filter by division or search by brand name or molecule to find the right product." />
           <div className="mt-8">

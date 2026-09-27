@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
-import { company } from "@/lib/site";
+import { company, FRANCHISE_PATH } from "@/lib/site";
 import { NavLinks } from "./NavLinks";
 import { MobileNav } from "./MobileNav";
 import { HeaderShell } from "./HeaderShell";
@@ -22,9 +22,9 @@ export function Header() {
             </a>
           </div>
           <div className="hidden items-center gap-4 md:flex">
-            <Link href="/business-opportunity#enquiry" className="transition hover:text-lime-300">Business Enquiry</Link>
+            <Link href={`${FRANCHISE_PATH}#enquiry`} className="transition hover:text-lime-300">Franchise Enquiry</Link>
             <span className="h-3 w-px bg-white/30" />
-            <Link href="/business-opportunity" className="transition hover:text-lime-300">Partner With Us</Link>
+            <Link href="/gallery" className="transition hover:text-lime-300">Product Gallery</Link>
             <span className="h-3 w-px bg-white/30" />
             <Link href="/careers" className="transition hover:text-lime-300">Careers</Link>
           </div>

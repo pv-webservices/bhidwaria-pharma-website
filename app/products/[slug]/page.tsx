@@ -181,7 +181,7 @@ export default async function ProductDetail({ params }: Props) {
         </div>
       </section>
 
-      <section id="enquiry" className="section-pad scroll-mt-28 bg-white">
+      <section id="enquiry" className="section-pad bg-white">
         <div className="container-shell grid items-start gap-10 lg:grid-cols-[.85fr_1.15fr]">
           <div>
             <div className="eyebrow">Send your enquiry</div>

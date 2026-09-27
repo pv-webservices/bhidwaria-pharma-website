@@ -58,7 +58,7 @@ export default function TherapyPage() {
         </div>
       </section>
 
-      <section id="pipeline" className="section-pad scroll-mt-28 bg-brand-mist/60">
+      <section id="pipeline" className="section-pad bg-brand-mist/60">
         <div className="container-shell">
           <SectionHeading eyebrow="Coming soon" title="Expanding Our Portfolio" description="We are actively working to extend our range into these segments. Partners interested in these therapies are welcome to register their interest." />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

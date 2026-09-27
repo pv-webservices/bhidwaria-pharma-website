@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Clock, Mail, MapPin, Phone } from "lucide-react";
-import { company, mainNav, whatsappLink } from "@/lib/site";
+import { company, FRANCHISE_PATH, mainNav, whatsappLink } from "@/lib/site";
 import { divisions } from "@/lib/products";
 import { WhatsAppIcon } from "./FloatingContact";
 
@@ -33,7 +33,13 @@ export function Footer() {
         <div>
           <h3 className="font-display text-sm font-bold uppercase tracking-[.14em] text-white">Quick Links</h3>
           <div className="mt-5 grid gap-2.5 text-sm">
-            {[...mainNav, { label: "Insights", href: "/blog" }, { label: "Careers", href: "/careers" }].map((x) => (
+            {[
+              ...mainNav,
+              { label: "Monopoly PCD Franchise", href: FRANCHISE_PATH },
+              { label: "Therapeutic Segments", href: "/therapeutic-segments" },
+              { label: "Quality", href: "/quality" },
+              { label: "Careers", href: "/careers" },
+            ].map((x) => (
               <Link key={x.href} href={x.href} className="group inline-flex items-center gap-1.5 transition hover:text-lime-300">
                 <ArrowRight size={12} className="-ml-4 opacity-0 transition-all group-hover:ml-0 group-hover:opacity-100" />
                 {x.label}

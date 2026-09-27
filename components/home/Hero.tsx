@@ -1,177 +1,240 @@
-import Image from "next/image";
+"use client";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
-import { ArrowRight, BadgeCheck, Pill, ShieldCheck, Sparkles } from "lucide-react";
-import { divisions, products } from "@/lib/products";
-import heroImage from "../../public/images/site/hero-scientist.webp";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { FRANCHISE_PATH } from "@/lib/site";
+import welcomeImg from "../../public/images/hero/hero-welcome.webp";
+import qualityImg from "../../public/images/hero/hero-quality.webp";
+import franchiseImg from "../../public/images/hero/hero-franchise.webp";
+import careImg from "../../public/images/hero/hero-care.webp";
 
-/** Seconds each product stays on screen in the hero showcase. */
-const SLIDE_SECONDS = 3;
+/** Seconds each slide stays on screen before auto-advancing. */
+const SLIDE_SECONDS = 7;
+/** Minimum horizontal drag (px) that counts as a swipe. */
+const SWIPE_PX = 50;
 
-const pad = (n: number) => String(n).padStart(2, "0");
+type Cta = { label: string; href: string };
+type Slide = {
+  id: string;
+  image: StaticImageData;
+  alt: string;
+  eyebrow: string;
+  title: string;
+  highlight: string;
+  text: string;
+  primary: Cta;
+  secondary: Cta;
+};
 
-const stats = [
-  { value: pad(products.length), label: "Branded Formulations" },
-  { value: pad(divisions.filter((d) => d.kind === "therapy").length), label: "Therapy Areas" },
-  { value: pad(divisions.filter((d) => d.kind === "dosage").length), label: "Dosage Forms" },
+const slides: Slide[] = [
+  {
+    id: "welcome",
+    image: welcomeImg,
+    alt: "Smiling Bhidwaria pharmaceutical scientist in a modern research laboratory",
+    eyebrow: "Namaste & Welcome",
+    title: "Welcome to",
+    highlight: "Bhidwaria Pharmaceuticals",
+    text: "Quality medicines from Meerut, Uttar Pradesh — made for doctors to prescribe with confidence, for chemists to stock with pride and for every family that deserves better health.",
+    primary: { label: "Explore Products", href: "/products" },
+    secondary: { label: "Discover Our Story", href: "/about" },
+  },
+  {
+    id: "quality",
+    image: qualityImg,
+    alt: "Quality inspection of a tablet blister pack on a pharmaceutical packing line",
+    eyebrow: "Quality in Every Strip",
+    title: "Precision-Made Medicines",
+    highlight: "You Can Trust",
+    text: "IP-standard formulations from licensed, quality-audited manufacturing partners — checked, documented and traceable from raw material to final dispatch.",
+    primary: { label: "Our Quality Promise", href: "/about#quality-assurance" },
+    secondary: { label: "View Product Gallery", href: "/gallery" },
+  },
+  {
+    id: "franchise",
+    image: franchiseImg,
+    alt: "Pharma company representative shaking hands with a distribution partner in a medicine warehouse",
+    eyebrow: "Monopoly PCD Pharma Franchise",
+    title: "Own Your Territory.",
+    highlight: "Grow With Exclusive Rights.",
+    text: "Partner with Bhidwaria on a monopoly basis — a focused, high-demand portfolio, transparent pricing, promotional support and dependable supply for your district.",
+    primary: { label: "Apply for Franchise", href: `${FRANCHISE_PATH}#enquiry` },
+    secondary: { label: "Explore Services", href: "/services" },
+  },
+  {
+    id: "care",
+    image: careImg,
+    alt: "Pharmacist handing medicine to a smiling elderly couple at a pharmacy counter",
+    eyebrow: "Better Health. Brighter Tomorrow.",
+    title: "Caring for Families",
+    highlight: "Across India",
+    text: "From anti-infectives and gastro care to pain relief and Vitamin D3 — dependable therapies that reach the pharmacy counter when patients need them most.",
+    primary: { label: "Therapeutic Segments", href: "/therapeutic-segments" },
+    secondary: { label: "Contact Us", href: "/contact" },
+  },
 ];
 
-const rise = (delay: number): CSSProperties => ({ animationDelay: `${delay}ms` });
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
-function slideFade(count: number) {
-  return Math.min(1.6, 100 / count / 6);
-}
+const pad = (n: number) => String(n).padStart(2, "0");
+const stagger = (i: number): CSSProperties => ({ "--i": i }) as CSSProperties;
 
-/** Crossfade keyframes sized to the number of products, so each slide gets an equal share of the loop. */
-function slideKeyframes(count: number) {
-  const share = 100 / count;
-  const fade = slideFade(count);
-  const f = (n: number) => `${n.toFixed(2)}%`;
-  // The incoming slide waits one fade-length so the outgoing slide has fully left before it appears.
-  return `@keyframes hero-slide{0%,${f(fade)}{opacity:0;visibility:visible;transform:translateY(14px)}${f(fade * 2)}{opacity:1;transform:none}${f(share)}{opacity:1;transform:none}${f(share + fade)}{opacity:0;visibility:hidden;transform:translateY(-14px)}100%{opacity:0;visibility:hidden}}`;
-}
-
-function ProductShowcase() {
-  const total = products.length * SLIDE_SECONDS;
-  // Start the loop with the first product already fully visible.
-  const lead = (slideFade(products.length) * 2 * total) / 100;
+function SlideCopy({ slide, isFirst }: { slide: Slide; isFirst: boolean }) {
+  // Exactly one <h1> on the page: the welcome slide carries it, the rest are <h2>.
+  const Heading = isFirst ? "h1" : "h2";
   return (
-    <div className="relative h-[92px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-white to-brand-mist">
-      <style>{slideKeyframes(products.length)}</style>
-      {products.map((p, i) => (
-        <Link
-          key={p.slug}
-          href={`/products/${p.slug}`}
-          className="hero-slide absolute inset-0 flex items-center gap-3 p-2.5"
-          style={{ animationDuration: `${total}s`, animationDelay: `${i * SLIDE_SECONDS - lead}s` }}
-          tabIndex={-1}
-        >
-          <span className="relative h-full w-[92px] shrink-0 overflow-hidden rounded-xl bg-white shadow-sm">
-            <Image src={p.image} alt="" fill sizes="92px" className="object-contain p-1.5" />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate font-display text-[15px] font-extrabold leading-5 text-brand-navy">{p.brand}</span>
-            <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500">{p.therapy}</span>
-            <span className="mt-1.5 inline-flex rounded-full bg-brand-pale px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-brand-green">{p.dosageForm}</span>
-          </span>
-        </Link>
-      ))}
-    </div>
-  );
-}
-
-function HeroVisual() {
-  return (
-    <div className="relative mx-auto w-full max-w-[640px] px-3 pb-16 pt-6 sm:px-8 lg:max-w-none lg:px-0 lg:pb-12 lg:pl-6">
-      {/* Decorative rings & glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[118%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-brand-sky/25 animate-spin-slow" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[92%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-lime/25 via-brand-sky/20 to-brand-blue/25 blur-3xl" />
-
-      {/* Main image */}
-      <div className="hero-rise group relative aspect-square overflow-hidden rounded-[32px] sm:aspect-[5/4] border-[6px] border-white bg-white shadow-lift sm:rounded-[40px] lg:aspect-[16/13.5]" style={rise(250)}>
-        <Image
-          src={heroImage}
-          alt="Bhidwaria pharmaceutical scientist examining samples under a microscope"
-          fill
-          priority
-          placeholder="blur"
-          sizes="(min-width:1024px) 48vw, 100vw"
-          className="object-cover object-[74%_center] transition duration-[1.4s] ease-out group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/45 via-transparent to-transparent" />
+    <div className="hero-copy max-w-[660px]">
+      <div className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 py-1.5 pl-1.5 pr-4 backdrop-blur-md" style={stagger(0)}>
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-brand-lime to-brand-sky text-white"><Sparkles size={12} /></span>
+        <span className="text-[11px] font-extrabold uppercase tracking-[.18em] text-white">{slide.eyebrow}</span>
       </div>
-
-      {/* Floating: brand count */}
-      <div className="hero-rise absolute left-0 top-0 sm:left-2 lg:-left-2 lg:top-8" style={rise(550)}>
-        <div className="flex animate-float items-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lift backdrop-blur-md">
-          <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-green to-emerald-600 text-white shadow-glow"><Pill size={19} /></span>
-          <span>
-            <span className="block font-display text-xl font-extrabold leading-6 text-brand-navy">{products.length} Brands</span>
-            <span className="block text-[11px] font-semibold text-slate-500">Tablets · Capsules · Oral Solutions</span>
-          </span>
-        </div>
+      <Heading
+        className="mt-5 font-display text-[36px] font-extrabold leading-[1.06] tracking-[-.035em] text-white sm:text-[50px] lg:text-[56px] xl:text-[64px] 2xl:text-[72px]"
+        style={stagger(1)}
+      >
+        {slide.title}{" "}
+        <span className="block bg-gradient-to-r from-lime-300 via-emerald-300 to-sky-300 bg-clip-text text-transparent">{slide.highlight}</span>
+      </Heading>
+      <p className="mt-5 max-w-[560px] text-[15px] leading-7 text-white/80 md:text-lg md:leading-8" style={stagger(2)}>{slide.text}</p>
+      <div className="mt-8 flex flex-wrap gap-3" style={stagger(3)}>
+        <Link href={slide.primary.href} className="btn btn-green !px-7 !py-3.5">{slide.primary.label} <ArrowRight size={16} /></Link>
+        <Link href={slide.secondary.href} className="btn btn-ghost-light !px-7 !py-3.5">{slide.secondary.label}</Link>
       </div>
-
-      {/* Floating: quality badge */}
-      <div className="hero-rise absolute right-0 top-[16%] hidden sm:block lg:-right-4 lg:top-[20%]" style={rise(700)}>
-        <div className="flex animate-float-slow items-center gap-2.5 rounded-full border border-white/70 bg-white/90 py-2 pl-2 pr-4 shadow-lift backdrop-blur-md">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-blue text-white"><ShieldCheck size={17} /></span>
-          <span className="text-[12px] font-extrabold leading-4 text-brand-navy">IP Standard<span className="block font-semibold text-slate-500">Quality Assured</span></span>
-        </div>
-      </div>
-
-      {/* Floating: product showcase */}
-      <div className="hero-rise absolute bottom-0 right-3 w-[min(330px,84%)] sm:right-8 lg:-bottom-1 lg:right-auto lg:left-0 xl:-left-10" style={rise(850)}>
-        <div className="rounded-3xl border border-white/70 bg-white/95 p-2.5 shadow-lift backdrop-blur-md">
-          <div className="flex items-center justify-between px-1.5 pb-2 pt-0.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-[.18em] text-brand-blue">Our Portfolio</span>
-            <span className="flex items-center gap-1.5 text-[10px] font-bold text-brand-green">
-              <span className="relative flex h-2 w-2"><span className="absolute inset-0 animate-ping rounded-full bg-brand-green/60" /><span className="relative h-2 w-2 rounded-full bg-brand-green" /></span>
-              Available now
-            </span>
-          </div>
-          <ProductShowcase />
-        </div>
+      <div className="mt-7 hidden flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] font-semibold text-white/75 sm:flex" style={stagger(4)}>
+        {["Quality Focused", "Patient-Centric Approach", "Ethical Partnerships"].map((t) => (
+          <span key={t} className="inline-flex items-center gap-1.5"><BadgeCheck size={16} className="text-lime-300" /> {t}</span>
+        ))}
       </div>
     </div>
   );
 }
 
 export function Hero() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [autoplay, setAutoplay] = useState(true);
+  const dragStart = useRef<number | null>(null);
+  const count = slides.length;
+
+  const go = useCallback((i: number) => setIndex((i + count) % count), [count]);
+  const next = useCallback(() => setIndex((i) => (i + 1) % count), [count]);
+  const prev = useCallback(() => setIndex((i) => (i - 1 + count) % count), [count]);
+
+  useEffect(() => {
+    // Respect reduced motion: no auto-advance, manual controls only.
+    const media = window.matchMedia(REDUCED_MOTION);
+    const sync = () => setAutoplay(!media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    const onVisibility = () => setPaused(document.hidden);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      media.removeEventListener("change", sync);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  // Checked live: the global reduced-motion rule can end the bar's animation before the effect above runs.
+  function onProgressEnd() {
+    if (!window.matchMedia(REDUCED_MOTION).matches) next();
+  }
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === "ArrowRight") next();
+    if (e.key === "ArrowLeft") prev();
+  }
+
+  function onPointerUp(e: PointerEvent) {
+    if (dragStart.current === null) return;
+    const dx = e.clientX - dragStart.current;
+    dragStart.current = null;
+    if (Math.abs(dx) >= SWIPE_PX) (dx < 0 ? next : prev)();
+  }
+
   return (
-    <section className="relative isolate overflow-hidden bg-hero-glow">
-      {/* Background layers */}
-      <div className="absolute inset-0 -z-10 pattern-grid opacity-60 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
-      <div className="pointer-events-none absolute -left-40 -top-40 -z-10 h-[520px] w-[520px] rounded-full bg-brand-lime/20 blur-3xl animate-blob" />
-      <div className="pointer-events-none absolute -right-32 top-1/3 -z-10 h-[560px] w-[560px] rounded-full bg-brand-sky/20 blur-3xl animate-blob [animation-delay:-7s]" />
-
-      <div className="container-wide grid items-center gap-12 pb-16 pt-10 sm:pt-14 lg:min-h-[620px] lg:grid-cols-[1.02fr_1fr] lg:gap-10 lg:py-12 xl:gap-16 2xl:min-h-[740px] 2xl:gap-24 2xl:py-16">
-        {/* Copy */}
-        <div className="max-w-[680px]">
-          <div className="hero-rise inline-flex items-center gap-2.5 rounded-full border border-brand-green/20 bg-white/80 py-1.5 pl-1.5 pr-4 shadow-card backdrop-blur" style={rise(0)}>
-            <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-brand-green to-brand-sky text-white"><Sparkles size={12} /></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-[.18em] text-brand-navy">Better Health. Brighter Tomorrow</span>
-          </div>
-
-          <h1 className="mt-5 2xl:mt-7 font-display text-[40px] font-extrabold leading-[1.04] tracking-[-.04em] text-brand-navy sm:text-[56px] lg:text-[54px] xl:text-[62px] 2xl:text-[76px]">
-            <span className="hero-rise block" style={rise(100)}>Advancing Healthcare.</span>
-            <span className="hero-rise mt-1 block" style={rise(200)}>
-              <span className="text-gradient-animated">Building Trusted</span>{" "}
-              <span className="relative inline-block text-gradient-animated">
-                Partnerships.
-                <svg className="hero-underline absolute -bottom-2 left-0 h-3 w-full text-brand-lime" viewBox="0 0 300 12" preserveAspectRatio="none" aria-hidden="true">
-                  <path d="M2 9 C 80 2, 200 2, 298 7" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-              </span>
-            </span>
-          </h1>
-
-          <p className="hero-rise lead mt-6 max-w-[560px] md:text-lg md:leading-8" style={rise(320)}>
-            At Bhidwaria Pharmaceuticals, we are committed to improving lives through high-quality, affordable and innovative pharmaceutical solutions — together for a healthier tomorrow.
-          </p>
-
-          <div className="hero-rise mt-8 grid gap-3 sm:flex sm:flex-wrap" style={rise(420)}>
-            <Link href="/products" className="btn btn-primary !px-7 !py-3.5">Explore Products <ArrowRight size={16} /></Link>
-            <Link href="/business-opportunity" className="btn btn-outline !px-7 !py-3.5">Partner With Us <Sparkles size={15} /></Link>
-          </div>
-
-          <dl className="hero-rise mt-8 grid max-w-[560px] grid-cols-3 2xl:mt-10 divide-x divide-brand-navy/10 rounded-3xl border border-white bg-white/70 py-4 shadow-card backdrop-blur" style={rise(520)}>
-            {stats.map(({ value, label }) => (
-              <div key={label} className="flex flex-col-reverse justify-end px-3 text-center sm:px-5">
-                <dt className="mt-1.5 text-[10.5px] font-bold uppercase leading-4 tracking-wider text-slate-500 sm:text-[11px]">{label}</dt>
-                <dd className="font-display text-2xl font-extrabold leading-none text-brand-navy sm:text-[32px]">{value}</dd>
+    <section
+      className="relative isolate overflow-hidden bg-[#041f3a] text-white"
+      aria-roledescription="carousel"
+      aria-label="Welcome to Bhidwaria Pharmaceuticals"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+      onKeyDown={onKeyDown}
+      onPointerDown={(e) => (dragStart.current = e.clientX)}
+      onPointerUp={onPointerUp}
+    >
+      <div className="relative h-[660px] sm:h-[640px] lg:h-[min(calc(100svh-116px),760px)] lg:min-h-[600px]">
+        {slides.map((slide, i) => {
+          const active = i === index;
+          return (
+            <div
+              key={slide.id}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${count}: ${slide.eyebrow}`}
+              inert={!active}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-out ${active ? "is-active z-10 opacity-100" : "z-0 opacity-0"}`}
+            >
+              <Image
+                src={slide.image}
+                alt={slide.alt}
+                fill
+                priority={i === 0}
+                placeholder="blur"
+                draggable={false}
+                sizes="100vw"
+                className="hero-kenburns object-cover object-[72%_center] lg:object-center"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#041f3a] via-[#041f3a]/75 to-[#041f3a]/25 lg:bg-gradient-to-r lg:from-[#041f3a]/95 lg:via-[#062f55]/65 lg:to-transparent" />
+              <div className="absolute inset-0 pattern-dots opacity-30 [mask-image:linear-gradient(90deg,black,transparent_60%)]" />
+              <div className="container-wide relative flex h-full items-end pb-28 lg:items-center lg:pb-12">
+                <SlideCopy slide={slide} isFirst={i === 0} />
               </div>
-            ))}
-          </dl>
+            </div>
+          );
+        })}
 
-          <div className="hero-rise mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] font-semibold text-slate-600" style={rise(600)}>
-            {["Quality Focused", "Patient-Centric Approach", "Ethical Partnerships"].map((t) => (
-              <span key={t} className="inline-flex items-center gap-1.5"><BadgeCheck size={16} className="text-brand-green" /> {t}</span>
-            ))}
+        {/* Controls */}
+        <div className="absolute inset-x-0 bottom-0 z-20">
+          <div className="container-wide flex items-center justify-between gap-4 pb-7 lg:pb-9">
+            <div className="flex items-center gap-2">
+              {slides.map((slide, i) => {
+                const active = i === index;
+                return (
+                  <button
+                    key={slide.id}
+                    onClick={() => go(i)}
+                    aria-label={`Go to slide ${i + 1}: ${slide.eyebrow}`}
+                    aria-current={active ? "true" : undefined}
+                    className={`relative h-1.5 overflow-hidden rounded-full bg-white/25 transition-all duration-500 hover:bg-white/45 ${active ? "w-14 sm:w-20" : "w-6 sm:w-8"}`}
+                  >
+                    {active && (
+                      <span
+                        key={index}
+                        className={`hero-progress absolute inset-0 rounded-full bg-gradient-to-r from-lime-300 to-sky-300 ${autoplay ? "is-running" : "is-static"}`}
+                        style={{ animationDuration: `${SLIDE_SECONDS}s`, animationPlayState: paused ? "paused" : "running" }}
+                        onAnimationEnd={onProgressEnd}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Right margin keeps the arrows clear of the fixed WhatsApp / call buttons. */}
+            <div className="mr-16 flex items-center gap-3 sm:mr-[4.5rem]">
+              <span className="hidden whitespace-nowrap font-display text-sm font-bold tabular-nums text-white/80 sm:inline" aria-live="polite">
+                <span className="text-white">{pad(index + 1)}</span> / {pad(count)}
+              </span>
+              <button onClick={prev} aria-label="Previous slide" className="grid h-10 w-10 place-items-center rounded-full border border-white/25 sm:h-11 sm:w-11 bg-white/5 backdrop-blur transition hover:border-lime-300 hover:bg-lime-300 hover:text-brand-navy">
+                <ChevronLeft size={19} />
+              </button>
+              <button onClick={next} aria-label="Next slide" className="grid h-10 w-10 place-items-center rounded-full border border-white/25 sm:h-11 sm:w-11 bg-white/5 backdrop-blur transition hover:border-lime-300 hover:bg-lime-300 hover:text-brand-navy">
+                <ChevronRight size={19} />
+              </button>
+            </div>
           </div>
         </div>
-
-        <HeroVisual />
       </div>
     </section>
   );

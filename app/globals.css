@@ -149,32 +149,19 @@ button, input, textarea, select { font: inherit; }
 .card-hover:hover .pack-img, .card-hover:focus-within .pack-img, .card-hover.is-touched .pack-img { transform: translateY(-3px); filter: drop-shadow(0 12px 22px rgba(6,47,85,.24)); }
 
 /* ---------- Hero ---------- */
-.hero-rise { animation: hero-rise .9s cubic-bezier(.22,1,.36,1) both; }
 @keyframes hero-rise {
   from { opacity: 0; transform: translateY(28px); }
   to { opacity: 1; transform: none; }
 }
-.text-gradient-animated {
-  background-image: linear-gradient(90deg, #4caf2a, #10b981, #1c9ad6, #0b5f97, #1c9ad6, #10b981, #4caf2a);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-pan 10s ease-in-out infinite;
-}
-@keyframes gradient-pan {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-.hero-underline path { stroke-dasharray: 320; stroke-dashoffset: 320; animation: draw-line 1.2s .9s cubic-bezier(.65,0,.35,1) forwards; }
-@keyframes draw-line { to { stroke-dashoffset: 0; } }
-.animate-blob { animation: blob 18s ease-in-out infinite; }
-@keyframes blob {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, -30px) scale(1.08); }
-  66% { transform: translate(-30px, 25px) scale(.95); }
-}
-.hero-slide { opacity: 0; visibility: hidden; animation-name: hero-slide; animation-timing-function: cubic-bezier(.22,1,.36,1); animation-iteration-count: infinite; animation-fill-mode: both; }
+/* Hero slider: slow zoom on the active image, staggered copy, autoplay progress bar */
+.hero-kenburns { transform: scale(1.09); transition: transform 8s cubic-bezier(.22,1,.36,1); }
+.is-active .hero-kenburns { transform: scale(1); }
+.hero-copy > * { opacity: 0; }
+.is-active .hero-copy > * { animation: hero-rise .9s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--i, 0) * 110ms + 250ms); }
+.hero-progress { transform-origin: left; transform: scaleX(0); }
+.hero-progress.is-running { animation-name: hero-progress; animation-timing-function: linear; animation-fill-mode: forwards; }
+.hero-progress.is-static { transform: none; }
+@keyframes hero-progress { to { transform: scaleX(1); } }
 
 /* ---------- Reveal on scroll ---------- */
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1); transition-delay: var(--d, 0ms); }
@@ -208,8 +195,6 @@ button, input, textarea, select { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
-  .hero-slide { animation: none; }
-  .hero-slide:first-of-type { opacity: 1; visibility: visible; }
-  .hero-underline path { stroke-dashoffset: 0; }
+  .hero-kenburns { transform: none; transition: none; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }

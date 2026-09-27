@@ -5,7 +5,7 @@ import { EnquiryForm } from "@/components/EnquiryForm";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
 import { WhatsAppIcon } from "@/components/FloatingContact";
-import { company, whatsappLink } from "@/lib/site";
+import { company, FRANCHISE_PATH, whatsappLink } from "@/lib/site";
 
 export const metadata = {
   title: "Contact Us",
@@ -51,7 +51,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section id="enquiry" className="section-pad scroll-mt-28 bg-white">
+      <section id="enquiry" className="section-pad bg-white">
         <div className="container-shell grid items-start gap-10 lg:grid-cols-[.9fr_1.1fr]">
           <div>
             <SectionHeading eyebrow="Reach us" title="We’d Love to Hear From You" description="Fill in the form and our team will respond promptly. For urgent queries, call or WhatsApp us directly." />
@@ -77,7 +77,7 @@ export default function ContactPage() {
         <div className="container-shell grid gap-5 md:grid-cols-3">
           {[
             { title: "Product Enquiries", text: "Request our product list, composition details, availability and literature.", href: "/products" , cta: "Browse Products" },
-            { title: "Business Opportunities", text: "Discuss PCD franchise, distribution or stockist partnerships for your region.", href: "/business-opportunity", cta: "Partner With Us" },
+            { title: "Business Opportunities", text: "Discuss monopoly PCD franchise, distribution or stockist partnerships for your region.", href: FRANCHISE_PATH, cta: "Partner With Us" },
             { title: "Careers", text: "Interested in joining our growing team? Send us your profile.", href: "/careers", cta: "View Careers" },
           ].map((c, i) => (
             <Reveal className="h-full" key={c.title} delay={i * 80}>

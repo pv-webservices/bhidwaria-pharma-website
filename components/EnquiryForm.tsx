@@ -4,7 +4,7 @@ import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { products } from "@/lib/products";
 import { whatsappLink } from "@/lib/site";
 
-export const ENQUIRY_TYPES = ["Product Enquiry", "PCD Franchise / Distribution", "Business Partnership", "Career Enquiry", "General Enquiry"] as const;
+export const ENQUIRY_TYPES = ["Product Enquiry", "Monopoly PCD Franchise", "Distribution / Stockist", "Business Partnership", "Career Enquiry", "General Enquiry"] as const;
 
 type Status = "idle" | "loading" | "success" | "error";
 

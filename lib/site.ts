@@ -21,12 +21,32 @@ export function whatsappLink(message = "Hello Bhidwaria Pharmaceuticals, I would
   return `https://wa.me/${company.whatsapp}?text=${encodeURIComponent(message)}`;
 }
 
-export const mainNav = [
+export const FRANCHISE_PATH = "/services/monopoly-pcd-pharma-franchise";
+
+export type NavChild = { label: string; href: string; description: string };
+export type NavItem = { label: string; href: string; children?: readonly NavChild[] };
+
+export const aboutNav: readonly NavChild[] = [
+  { label: "Company Overview", href: "/about#company-overview", description: "Who we are and what we do" },
+  { label: "Director's Message", href: "/about#directors-message", description: "A word from our leadership" },
+  { label: "Vision, Mission & Values", href: "/about#vision-mission-values", description: "The principles that guide us" },
+  { label: "Why Choose Us", href: "/about#why-choose-us", description: "What sets Bhidwaria apart" },
+  { label: "Quality Assurance", href: "/about#quality-assurance", description: "Our commitment to every batch" },
+];
+
+export const servicesNav: readonly NavChild[] = [
+  { label: "Franchise / Business", href: FRANCHISE_PATH, description: "Monopoly PCD Pharma Franchise Opportunity" },
+  { label: "Distribution & Stockist", href: "/services#distribution", description: "Supply partnerships for your region" },
+  { label: "Marketing Support", href: "/services#marketing-support", description: "Visual aids, literature & promotion" },
+];
+
+/** Products uses its own mega menu; items with `children` render as dropdowns. */
+export const mainNav: readonly NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
+  { label: "About Us", href: "/about", children: aboutNav },
   { label: "Products", href: "/products" },
-  { label: "Therapeutic Segments", href: "/therapeutic-segments" },
-  { label: "Quality", href: "/quality" },
-  { label: "Franchise / Business", href: "/business-opportunity" },
+  { label: "Services", href: "/services", children: servicesNav },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
-] as const;
+];

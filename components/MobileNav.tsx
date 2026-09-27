@@ -10,9 +10,55 @@ import { isActive } from "./NavLinks";
 const linkClass = (active: boolean) =>
   `rounded-xl px-4 py-3 text-[15px] font-semibold transition active:bg-brand-mist ${active ? "bg-brand-mist text-brand-blue" : "text-brand-ink"}`;
 
+const productLinks = [
+  ...divisions.map((d) => ({ label: d.title, href: `/products/division/${d.slug}` })),
+  { label: "Therapeutic Segments", href: "/therapeutic-segments" },
+];
+
+function Submenu({
+  label,
+  href,
+  links,
+  active,
+  open,
+  onToggle,
+}: {
+  label: string;
+  href: string;
+  links: readonly { label: string; href: string }[];
+  active: boolean;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-center">
+        <Link href={href} className={`flex-1 ${linkClass(active)}`}>{label}</Link>
+        <button
+          onClick={onToggle}
+          aria-label={`Toggle ${label} menu`}
+          aria-expanded={open}
+          className="grid h-11 w-11 place-items-center rounded-xl text-brand-navy"
+        >
+          <ChevronDown size={18} className={`transition ${open ? "rotate-180" : ""}`} />
+        </button>
+      </div>
+      {open && (
+        <div className="ml-4 grid gap-0.5 border-l-2 border-brand-green/30 pl-3">
+          {links.map((l) => (
+            <Link key={l.href} href={l.href} className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 active:bg-brand-mist">
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MobileNav() {
   const [open, setOpen] = useState(false);
-  const [productsOpen, setProductsOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const pathname = usePathname();
 
   useEffect(() => setOpen(false), [pathname]);
@@ -22,6 +68,8 @@ export function MobileNav() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const toggle = (href: string) => setExpanded((cur) => (cur === href ? null : href));
 
   return (
     <div className="lg:hidden">
@@ -35,38 +83,30 @@ export function MobileNav() {
       </button>
       {open && (
         <div className="absolute left-0 top-full h-[calc(100dvh-100%)] w-full overflow-y-auto border-t border-slate-100 bg-white pb-10 shadow-soft">
-          <nav className="container-shell flex flex-col gap-1 pt-4" aria-label="Mobile">
-            {mainNav.map((item) =>
-              item.href === "/products" ? (
-                <div key={item.href}>
-                  <div className="flex items-center">
-                    <Link href="/products" className={`flex-1 ${linkClass(isActive(pathname, "/products"))}`}>Products</Link>
-                    <button
-                      onClick={() => setProductsOpen(!productsOpen)}
-                      aria-label="Toggle product divisions"
-                      aria-expanded={productsOpen}
-                      className="grid h-11 w-11 place-items-center rounded-xl text-brand-navy"
-                    >
-                      <ChevronDown size={18} className={`transition ${productsOpen ? "rotate-180" : ""}`} />
-                    </button>
-                  </div>
-                  {productsOpen && (
-                    <div className="ml-4 grid gap-0.5 border-l-2 border-brand-green/30 pl-3">
-                      {divisions.map((d) => (
-                        <Link key={d.slug} href={`/products/division/${d.slug}`} className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 active:bg-brand-mist">
-                          {d.title}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+          {/* Close on any link tap: hash links (e.g. /about#why-choose-us) keep the same pathname. */}
+          <nav
+            className="container-shell flex flex-col gap-1 pt-4"
+            aria-label="Mobile"
+            onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}
+          >
+            {mainNav.map((item) => {
+              const links = item.href === "/products" ? productLinks : item.children;
+              return links ? (
+                <Submenu
+                  key={item.href}
+                  label={item.label}
+                  href={item.href}
+                  links={links}
+                  active={isActive(pathname, item.href)}
+                  open={expanded === item.href}
+                  onToggle={() => toggle(item.href)}
+                />
               ) : (
                 <Link key={item.href} href={item.href} className={linkClass(isActive(pathname, item.href))}>
                   {item.label}
                 </Link>
-              ),
-            )}
-            <Link href="/blog" className={linkClass(isActive(pathname, "/blog"))}>Insights & Articles</Link>
+              );
+            })}
             <Link href="/careers" className={linkClass(isActive(pathname, "/careers"))}>Careers</Link>
             <Link href="/contact#enquiry" className="btn btn-primary mt-4">Enquire Now</Link>
             <div className="mt-5 grid gap-2.5 rounded-2xl bg-brand-mist p-4 text-sm text-brand-navy">
